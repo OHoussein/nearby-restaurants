@@ -1,0 +1,12 @@
+apply plugin: BuildPlugins.kotlin
+apply plugin: BuildPlugins.testLogger
+apply plugin: BuildPlugins.detekt
+
+dependencies {
+    implementation Libs.kotlinStdlib
+    implementation Libs.coroutinesCore
+
+    testImplementation TestLibs.junit
+    testImplementation TestLibs.mockito
+    testImplementation TestLibs.mockitoInline
+}

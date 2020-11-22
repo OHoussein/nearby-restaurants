@@ -1,0 +1,9 @@
+# Building upon default config
+# Only include rule modifications in this file
+# For default rules see:
+# https://github.com/arturbosch/detekt/blob/master/detekt-cli/src/main/resources/default-detekt-config.yml
+autoCorrect: true
+style:
+  active: true
+  MagicNumber:
+    active: false

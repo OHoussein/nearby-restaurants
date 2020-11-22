@@ -1,0 +1,3 @@
+-keepattributes LineNumberTable,SourceFile
+-keep class androidx.core.app.NotificationCompat$* { *; }
+-keep public class * extends androidx.fragment.app.Fragment
