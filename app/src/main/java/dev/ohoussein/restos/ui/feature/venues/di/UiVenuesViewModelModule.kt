@@ -18,6 +18,6 @@ object UiVenuesViewModelModule {
     @Provides
     fun provideNearbyRestaurantsViewModel(coroutineContextProvider: CoroutineContextProvider,
                                           useCase: GetNearbyVenuesUseCase,
-                                          entityMapper: UiDomainModelMapper) =
+                                          entityMapper: UiDomainModelMapper): NearbyRestaurantsViewModel =
             NearbyRestaurantsViewModel(coroutineContextProvider, useCase, entityMapper)
 }

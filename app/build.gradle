@@ -115,6 +115,7 @@ dependencies {
     implementation Libs.lifecycleLiveData
     implementation Libs.fragmentKtx
     implementation Libs.mapBox
+    implementation Libs.mapBoxAnnotation
 
     //Data
     implementation Libs.retofit

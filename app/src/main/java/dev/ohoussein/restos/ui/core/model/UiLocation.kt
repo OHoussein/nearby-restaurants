@@ -6,7 +6,7 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class UiLocation(
         val coordinates: UiCoordinates,
-        val address: String,
+        val address: String?,
         val city: String?,
         val distance: Int,
 ) : Parcelable

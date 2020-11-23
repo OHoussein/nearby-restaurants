@@ -12,23 +12,37 @@ import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
+import androidx.fragment.app.viewModels
 import com.mapbox.android.core.location.*
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.modes.CameraMode
+import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
+import dagger.hilt.android.AndroidEntryPoint
 import dev.ohoussein.restos.R
 import dev.ohoussein.restos.databinding.FragmentMapBinding
+import dev.ohoussein.restos.ui.core.model.UiResource
+import dev.ohoussein.restos.ui.core.model.UiVenue
+import dev.ohoussein.restos.ui.core.util.MapUtils.toLatLng
+import dev.ohoussein.restos.ui.core.util.MapUtils.toUiCoordinates
+import dev.ohoussein.restos.ui.feature.venues.viewmodel.NearbyRestaurantsViewModel
 import timber.log.Timber
 
+@AndroidEntryPoint
 class RestaurantsMapFragment : MapBoxFragment() {
 
     companion object {
         const val DEFAULT_INTERVAL_IN_MILLISECONDS = 60L
         const val DEFAULT_ZOOM_ON_LOCATION = 14.0
+        const val RESTAURANT_ICON_NAME = "restaurant-15"
+        const val RESTAURANT_ICON_SIZE = 2F
     }
 
     private var _binding: FragmentMapBinding? = null
@@ -54,6 +68,10 @@ class RestaurantsMapFragment : MapBoxFragment() {
                     showRationaleDialogForLocationPermission()
                 }
             }
+    private var symbolManager: SymbolManager? = null
+
+    private val viewModel: NearbyRestaurantsViewModel by viewModels()
+    private val dicSymbolVenue = mutableMapOf<Symbol, UiVenue>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +86,8 @@ class RestaurantsMapFragment : MapBoxFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        symbolManager?.onDestroy()
+        symbolManager = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -78,19 +98,24 @@ class RestaurantsMapFragment : MapBoxFragment() {
         mapView?.getMapAsync { mapboxMap ->
             this.mapboxMap = mapboxMap
 
-            mapboxMap.setStyle(Style.MAPBOX_STREETS) {
-                enableLocationComponentWithPermission(it)
+            mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
+                enableLocationComponentWithPermission(style)
+                symbolManager = initSymbloManager(binding.mapView, mapboxMap, style)
+                observeData()
             }
             mapboxMap.addOnCameraMoveListener {
                 mapboxMap.cameraPosition.padding
-                with(mapboxMap.projection.visibleRegion.latLngBounds) {
-                    Timber.d("bounds: $northEast $southWest")
-                }
+
+                val newCoordinates = mapboxMap.projection.visibleRegion.latLngBounds.toUiCoordinates()
+                viewModel.updateViewPort(newCoordinates)
+                Timber.d("bounds: $newCoordinates")
             }
         }
     }
 
-
+    ///////////////////////////////////////////////////////////////////////////
+    // MapBox
+    ///////////////////////////////////////////////////////////////////////////
     private fun enableLocationComponentWithPermission(loadedMapStyle: Style) {
         when {
             checkSelfPermission(requireContext(), locationPermission) == PermissionChecker.PERMISSION_GRANTED -> {
@@ -149,6 +174,17 @@ class RestaurantsMapFragment : MapBoxFragment() {
         this.locationUpdateListener = locationListener
     }
 
+    private fun initSymbloManager(mapView: MapView, mapboxMap: MapboxMap, style: Style): SymbolManager {
+        return SymbolManager(mapView, mapboxMap, style)
+                .apply {
+                    addClickListener {
+                        val venue = dicSymbolVenue[it] ?: return@addClickListener false
+                        onSelectVenue(venue)
+                        return@addClickListener true
+                    }
+                }
+    }
+
     override fun onStop() {
         super.onStop()
         locationUpdateListener?.let {
@@ -165,13 +201,49 @@ class RestaurantsMapFragment : MapBoxFragment() {
 
 
     private fun showRationaleDialogForLocationPermission() {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+        AlertDialog.Builder(requireContext())
                 .setTitle(R.string.permission_location_permission_title)
                 .setMessage(R.string.permission_location_permission_message)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     askLocationPermission.launch(locationPermission)
                 }
-        builder.create().show()
+                .create()
+                .show()
+    }
+
+
+    private fun addVenueToMap(uiVenue: UiVenue) {
+        symbolManager?.let { symbolManager ->
+            val symbol = symbolManager.create(
+                    SymbolOptions()
+                            .withLatLng(uiVenue.location.coordinates.toLatLng())
+                            .withIconImage(RESTAURANT_ICON_NAME)
+                            .withIconSize(RESTAURANT_ICON_SIZE)
+            )
+            dicSymbolVenue[symbol] = uiVenue
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // data
+    ///////////////////////////////////////////////////////////////////////////
+
+    private fun observeData() {
+        viewModel.restaurantList.observe(viewLifecycleOwner, { resource ->
+            when (resource) {
+                is UiResource.Success -> {
+                    dicSymbolVenue.clear()
+                    Timber.d("Got data $resource")
+                    resource.data.forEach { uiVenue ->
+                        addVenueToMap(uiVenue)
+                    }
+                }
+            }
+        })
+    }
+
+    private fun onSelectVenue(venue: UiVenue) {
+        Timber.d("Click on venue ${venue.name}")
     }
 
 }

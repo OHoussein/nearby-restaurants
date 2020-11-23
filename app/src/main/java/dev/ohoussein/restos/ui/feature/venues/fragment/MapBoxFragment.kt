@@ -39,7 +39,7 @@ open class MapBoxFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        super.onDestroy()
+        super.onDestroyView()
         mapView?.onDestroy()
     }
 }

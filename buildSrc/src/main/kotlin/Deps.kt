@@ -82,6 +82,7 @@ object Libs {
     const val coroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutines}"
 
     const val mapBox = "com.mapbox.mapboxsdk:mapbox-android-sdk:9.2.1"
+    const val mapBoxAnnotation = "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.9.0"
 }
 
 object DebugLibs {

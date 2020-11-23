@@ -25,9 +25,11 @@ object DataModule {
     @Provides
     @Singleton
     fun provideOkHttp(
+            @Named(DIConstants.Qualifier.API_CLIENT_ID) clientId: String,
+            @Named(DIConstants.Qualifier.API_CLIENT_SECRET) clientSecret: String,
             @Named(DIConstants.Qualifier.HTTP_INTERCEPTOR) httpInterceptor: Array<Interceptor>,
             @Named(DIConstants.Qualifier.HTTP_NETWORK_INTERCEPTOR) httpNetworkInterceptor: Array<Interceptor>,
-    ): OkHttpClient = NetworkBuilder.createOkHttp(httpInterceptor, httpNetworkInterceptor)
+    ): OkHttpClient = NetworkBuilder.createOkHttp(clientId, clientSecret, httpInterceptor, httpNetworkInterceptor)
 
     @Provides
     @Singleton
