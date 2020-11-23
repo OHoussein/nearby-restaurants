@@ -35,7 +35,7 @@ object BuildPlugins {
 }
 
 object AndroidSdk {
-    const val minSdk = 21
+    const val minSdk = 23
     const val compileSdk = 30
     const val targetSdk = compileSdk
 }
@@ -46,7 +46,7 @@ object Libs {
         const val daggerHiltJetpack = "1.0.0-alpha02"
         const val lifecycle = "2.2.0"
         const val coroutines = "1.3.9"
-        const val fragment = "1.2.5"
+        const val fragment = "1.3.0-beta01"
 
         const val stetho = "1.5.1"
 
@@ -58,6 +58,7 @@ object Libs {
 
     const val kotlinStdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${BuildPlugins.Versions.kotlinVersion}"
     const val appcompat = "androidx.appcompat:appcompat:1.2.0"
+    const val activityKtx = "androidx.activity:activity-ktx:1.2.0-beta01"
     const val recyclerview = "androidx.recyclerview:recyclerview:1.1.0"
     const val material = "com.google.android.material:material:1.2.1"
     const val constraintlayout = "androidx.constraintlayout:constraintlayout:2.0.4"
@@ -79,6 +80,8 @@ object Libs {
 
     const val coroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}"
     const val coroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutines}"
+
+    const val mapBox = "com.mapbox.mapboxsdk:mapbox-android-sdk:9.2.1"
 }
 
 object DebugLibs {

@@ -106,6 +106,7 @@ dependencies {
 
     //Presentation
     implementation Libs.appcompat
+    implementation Libs.activityKtx
     implementation Libs.recyclerview
     implementation Libs.material
     implementation Libs.constraintlayout
@@ -113,6 +114,7 @@ dependencies {
     implementation Libs.lifecycleViewModel
     implementation Libs.lifecycleLiveData
     implementation Libs.fragmentKtx
+    implementation Libs.mapBox
 
     //Data
     implementation Libs.retofit

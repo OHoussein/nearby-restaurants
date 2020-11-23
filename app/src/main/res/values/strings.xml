@@ -8,4 +8,8 @@
     <string name="error_no_internet_connection">No internet connection</string>
     <string name="error_unknown_error_with_message">Internal error: %1$s</string>
     <string name="error_unknown_error">Internal error</string>
+
+    <!--Permission-->
+    <string name="permission_location_permission_title">We need your permission</string>
+    <string name="permission_location_permission_message">The location permission is required to show you the restaurants around you.</string>
 </resources>

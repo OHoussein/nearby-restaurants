@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--TODO I set this key here just for the demo, so pleaes don't use it for your projets -->
+    <string name="mapbox_access_token">pk.eyJ1Ijoib3dob3Vzc2VpbiIsImEiOiJja2h0bWhvcGkwYzFiMnRvMzFkdHkzM2h3In0.XGbzQFDLuxEeON0cx3zeLQ</string>
+</resources>

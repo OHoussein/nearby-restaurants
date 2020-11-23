@@ -21,6 +21,22 @@ allprojects {
     repositories {
         jcenter()
         google()
+        maven {
+            url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+            credentials {
+                // This should always be `mapbox` (not your username).
+                username = "mapbox"
+                // Use the secret token you stored in gradle.properties as the password
+                password = if (project.hasProperty("MAPBOX_DOWNLOADS_TOKEN")) {
+                    project.property("MAPBOX_DOWNLOADS_TOKEN") as String
+                } else {
+                    System.getenv("MAPBOX_DOWNLOADS_TOKEN")
+                } ?: throw IllegalArgumentException("SDK  key is not specified")
+            }
+        }
     }
 }
 
@@ -48,7 +64,7 @@ val detektAll by tasks.registering(io.gitlab.arturbosch.detekt.Detekt::class) {
 
 tasks {
     withType<io.gitlab.arturbosch.detekt.Detekt> {
-        // Target version of the generated JVM bytecode. It is used for type resolution.
+// Target version of the generated JVM bytecode. It is used for type resolution.
         this.jvmTarget = "1.8"
     }
 }
