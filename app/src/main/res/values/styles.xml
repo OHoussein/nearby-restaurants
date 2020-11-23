@@ -6,17 +6,12 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorOnPrimary">@color/colorOnPrimary</item>
         <item name="toolbarStyle">@style/toolbar</item>
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorOnSecondary">@color/coloronSecondary</item>
     </style>
 
     <style name="toolbar" parent="@style/Widget.MaterialComponents.Toolbar">
         <item name="titleTextColor">@android:color/white</item>
-    </style>
-
-    <style name="repo_value_info">
-        <item name="android:gravity">center</item>
-        <item name="android:padding">@dimen/spacing_s</item>
-        <item name="android:layout_margin">@dimen/spacing_m</item>
-        <item name="android:drawablePadding">@dimen/spacing_s</item>
     </style>
 
     <style name="message_error_loading">
@@ -24,5 +19,13 @@
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Medium</item>
     </style>
 
-    <color name="colorOnPrimary">#FFFFFF</color>
+
+    <style name="textview_venue_detail_item">
+        <item name="android:textAppearance">@style/TextAppearance.MaterialComponents.Subtitle1
+        </item>
+        <item name="drawableTint">?attr/colorOnPrimary</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:drawablePadding">@dimen/spacing_m</item>
+        <item name="android:padding">@dimen/spacing_m</item>
+    </style>
 </resources>

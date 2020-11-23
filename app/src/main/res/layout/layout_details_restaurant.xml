@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bsDetailsVenue"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:behavior_hideable="true"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <View
+        android:id="@+id/viewBg"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/half_fab"
+        android:background="@color/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="@id/tvVenueCategory"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvVenueName"
+        style="@style/textview_venue_detail_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        app:drawableStartCompat="@drawable/ic_restaurant_xs"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnVenueDirection"
+        tools:text="Googleplex - Charlie's Cafe" />
+
+    <TextView
+        android:id="@+id/tvVenueAddress"
+        style="@style/textview_venue_detail_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        app:drawableStartCompat="@drawable/ic_location_xs"
+        app:layout_constraintStart_toStartOf="@id/tvVenueName"
+        app:layout_constraintTop_toBottomOf="@+id/tvVenueName"
+        tools:text="1600 Amphitheatre Pkwy, Mountain View" />
+
+    <TextView
+        android:id="@+id/tvVenueCategory"
+        style="@style/textview_venue_detail_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        app:drawableStartCompat="@drawable/ic_category_xs"
+        app:layout_constraintStart_toStartOf="@id/tvVenueName"
+        app:layout_constraintTop_toBottomOf="@+id/tvVenueAddress"
+        tools:text="Corporate Cafeteria" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnVenueDirection"
+        android:layout_width="@dimen/fab"
+        android:layout_height="@dimen/fab"
+        android:layout_marginEnd="@dimen/spacing_m"
+        android:clickable="true"
+        android:focusable="true"
+        app:elevation="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_directions_xs" />
+</androidx.constraintlayout.widget.ConstraintLayout>

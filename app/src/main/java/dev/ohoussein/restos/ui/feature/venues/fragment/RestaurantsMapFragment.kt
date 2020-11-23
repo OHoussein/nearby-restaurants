@@ -12,6 +12,7 @@ import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.mapbox.android.core.location.*
 import com.mapbox.mapboxsdk.Mapbox
@@ -33,6 +34,7 @@ import dev.ohoussein.restos.ui.core.model.UiVenue
 import dev.ohoussein.restos.ui.core.util.MapUtils.toLatLng
 import dev.ohoussein.restos.ui.core.util.MapUtils.toUiCoordinates
 import dev.ohoussein.restos.ui.feature.venues.viewmodel.NearbyRestaurantsViewModel
+import dev.ohoussein.restos.ui.feature.venues.viewmodel.ShareRestaurantsViewModel
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -71,6 +73,7 @@ class RestaurantsMapFragment : MapBoxFragment() {
     private var symbolManager: SymbolManager? = null
 
     private val viewModel: NearbyRestaurantsViewModel by viewModels()
+    private val sharedViewModel: ShareRestaurantsViewModel by activityViewModels()
     private val dicSymbolVenue = mutableMapOf<Symbol, UiVenue>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -229,21 +232,27 @@ class RestaurantsMapFragment : MapBoxFragment() {
     ///////////////////////////////////////////////////////////////////////////
 
     private fun observeData() {
+        sharedViewModel.selectedVenue.observe(viewLifecycleOwner, { venue: UiVenue? ->
+            Timber.d("Selected venue ${venue?.name}")
+        })
+
         viewModel.restaurantList.observe(viewLifecycleOwner, { resource ->
             when (resource) {
                 is UiResource.Success -> {
                     dicSymbolVenue.clear()
-                    Timber.d("Got data $resource")
+                    Timber.d("Got data")
                     resource.data.forEach { uiVenue ->
                         addVenueToMap(uiVenue)
                     }
                 }
             }
         })
+
+
     }
 
     private fun onSelectVenue(venue: UiVenue) {
-        Timber.d("Click on venue ${venue.name}")
+        sharedViewModel.selectedVenue.value = venue
     }
 
 }
