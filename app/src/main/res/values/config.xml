@@ -2,6 +2,6 @@
 <resources>
     <!--TODO I set this key here just for the demo, so pleaes don't use it for your projets -->
     <string name="mapbox_access_token">pk.eyJ1Ijoib3dob3Vzc2VpbiIsImEiOiJja2h0bWhvcGkwYzFiMnRvMzFkdHkzM2h3In0.XGbzQFDLuxEeON0cx3zeLQ</string>
-    <string name="fsq_client_id">0SRX24T2DM0MWWG1F3SXKDTDTJHMR1IVZQRMYFL4F4L4NWCS</string>
-    <string name="fsq_secret">DDNMXGJ2US4V2J50LS3JM5MPEROQC0DXL1DDZTY0AORO5GK5</string>
+    <string name="fsq_client_id">OY0OLRRQTHHEBHKGXIRHUV24EJPBPH22EZPTD1SZOAPYD0ZQ</string>
+    <string name="fsq_secret">OLCONQKQM5OGPZHEC3EXE3XQVH1VKJZVV422TC4ZZPQNERSX</string>
 </resources>

@@ -10,6 +10,9 @@ import dev.ohoussein.restos.ui.core.model.UiResource
 import dev.ohoussein.restos.ui.core.model.UiVenue
 import dev.ohoussein.restos.ui.core.model.UiViewPort
 import dev.ohoussein.restos.ui.core.util.uiResourceFlow
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
@@ -20,23 +23,28 @@ class NearbyRestaurantsViewModel @ViewModelInject constructor(
 
     companion object {
         const val LIMIT_VENUE_LIST = 50
+        const val DEBOUNCE_TIMER = 1000L
     }
 
     private val viewPort = MutableLiveData<UiViewPort>()
 
-    val restaurantList: LiveData<UiResource<List<UiVenue>>> = viewPort.switchMap { uiViewPort ->
-        //TODO read from cache first
-        val params = GetVenuesParams(
-                coordinates = modelsMapper.toDomain(uiViewPort.center),
-                radius = uiViewPort.radius,
-                limit = LIMIT_VENUE_LIST,
-        )
-        useCase.get(params)
-                .map { list -> list.map { modelsMapper.toUiModel(it) } }
-                .uiResourceFlow()
-                .flowOn(coroutineContextProvider.io)
-                .asLiveData()
-    }
+    @OptIn(FlowPreview::class)
+    val restaurantList: LiveData<UiResource<List<UiVenue>>> = viewPort
+            .asFlow()
+            .debounce(DEBOUNCE_TIMER)
+            .flatMapLatest { uiViewPort ->
+                //TODO read from cache first
+                val params = GetVenuesParams(
+                        coordinates = modelsMapper.toDomain(uiViewPort.center),
+                        radius = uiViewPort.radius,
+                        limit = LIMIT_VENUE_LIST,
+                )
+                useCase.get(params)
+                        .map { list -> list.map { modelsMapper.toUiModel(it) } }
+                        .uiResourceFlow()
+                        .flowOn(coroutineContextProvider.io)
+            }
+            .asLiveData()
 
     fun updateViewPort(uiViewPort: UiViewPort) {
         viewPort.value = uiViewPort
