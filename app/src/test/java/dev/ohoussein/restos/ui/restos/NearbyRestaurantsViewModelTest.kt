@@ -1,4 +1,4 @@
-package dev.ohoussein.restos.ui.repolist
+package dev.ohoussein.restos.ui.restos
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
@@ -20,6 +20,7 @@ import dev.ohoussein.restos.ui.feature.venues.viewmodel.NearbyRestaurantsViewMod
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -53,14 +54,15 @@ class NearbyRestaurantsViewModelTest {
     fun setup() {
         useCase = mock()
         tested = NearbyRestaurantsViewModel(
-                TestCoroutineContextProvider(),
+                TestCoroutineContextProvider(testCoroutineRule.testCoroutineDispatcher),
                 useCase,
-                uiMapper
+                uiMapper,
         )
+        tested.debounceTimer = 0
     }
 
     @Test
-    fun `should load venue list`() {
+    fun `should load venue list`() = testCoroutineRule.testCoroutineDispatcher.runBlockingTest {
         //Given
         val listVenue = TestDataFactory.createRandomVenueList(10)
         val uiData = listVenue.map { uiMapper.toUiModel(it) }
@@ -70,7 +72,7 @@ class NearbyRestaurantsViewModelTest {
         tested.restaurantList.observeForever(mockRepoListObserver)
         tested.updateViewPort(viewPort)
         //Then
-        verify(mockRepoListObserver).onChanged(UiResource.Loading())
+        verify(mockRepoListObserver).onChanged(any<UiResource.Loading<List<UiVenue>>>())
         verify(mockRepoListObserver).onChanged(UiResource.Success(uiData))
     }
 
@@ -84,7 +86,7 @@ class NearbyRestaurantsViewModelTest {
         tested.restaurantList.observeForever(mockRepoListObserver)
         tested.updateViewPort(viewPort)
         //Then
-        verify(mockRepoListObserver).onChanged(UiResource.Loading())
-        verify(mockRepoListObserver).onChanged(UiResource.Error(error))
+        verify(mockRepoListObserver).onChanged(any<UiResource.Loading<List<UiVenue>>>())
+        verify(mockRepoListObserver).onChanged(any<UiResource.Error<List<UiVenue>>>())
     }
 }

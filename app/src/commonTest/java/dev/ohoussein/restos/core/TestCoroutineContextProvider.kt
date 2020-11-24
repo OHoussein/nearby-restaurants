@@ -1,10 +1,11 @@
 package dev.ohoussein.restos.core
 
 import dev.ohoussein.restos.common.coroutine.CoroutineContextProvider
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
-class TestCoroutineContextProvider : CoroutineContextProvider() {
+class TestCoroutineContextProvider(dispatcher: CoroutineDispatcher? = null) : CoroutineContextProvider() {
 
-    override val main = Dispatchers.Unconfined
-    override val io = Dispatchers.Unconfined
+    override val main = dispatcher ?: Dispatchers.Unconfined
+    override val io = dispatcher ?: Dispatchers.Unconfined
 }

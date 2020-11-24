@@ -1,4 +1,4 @@
-package dev.ohoussein.restos.ui.repolist
+package dev.ohoussein.restos.ui.restos
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -31,4 +31,5 @@ class RestaurantsActivityTest {
         hiltRule.inject()
     }
 
+    //TODO add tests here
 }

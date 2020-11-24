@@ -42,7 +42,7 @@ class RestaurantsMapFragment : MapBoxFragment() {
 
     companion object {
         const val DEFAULT_INTERVAL_IN_MILLISECONDS = 60L
-        const val DEFAULT_ZOOM_ON_LOCATION = 14.0
+        const val DEFAULT_ZOOM_ON_LOCATION = 16.0
         const val RESTAURANT_ICON_NAME = "restaurant-15"
         const val RESTAURANT_ICON_SIZE = 2F
     }

@@ -29,10 +29,16 @@ class NearbyRestaurantsViewModel @ViewModelInject constructor(
 
     private val cachedVenueList = mutableListOf<UiVenue>()
 
+    //TODO this is workoround because TestCoroutineScope  doesn't block the debounce
+    var debounceTimer: Long = DEBOUNCE_TIMER
+
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val restaurantList: LiveData<UiResource<List<UiVenue>>> = viewPortLive
             .asFlow()
-            .debounce(DEBOUNCE_TIMER)
+            .apply {
+                if (debounceTimer > 0)
+                    debounce(debounceTimer)
+            }
             .flatMapLatest { currentViewPort ->
                 Timber.d("Call ws for $currentViewPort")
                 val params = GetVenuesParams(
@@ -52,10 +58,10 @@ class NearbyRestaurantsViewModel @ViewModelInject constructor(
                         .flowOn(coroutineContextProvider.io)
             }
             .onStart {
-                viewPortLive.value?.let {
-                    val cached = getFromCache(it)
-                    emit(UiResource.Loading(cached))
-                }
+                val cached = viewPortLive.value?.let {
+                    getFromCache(it)
+                } ?: emptyList()
+                emit(UiResource.Loading(cached))
             }
             .catch { error ->
                 viewPortLive.value?.let {
@@ -68,6 +74,7 @@ class NearbyRestaurantsViewModel @ViewModelInject constructor(
                 if (it is UiResource.Success)
                     addToCache(it.data)
             }
+            .flowOn(coroutineContextProvider.io)
             .asLiveData()
 
     private fun addToCache(list: List<UiVenue>) {
