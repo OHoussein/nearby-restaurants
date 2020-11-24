@@ -45,8 +45,9 @@ class RestaurantsActivity : AppCompatActivity() {
 
         bottomSheet.addBottomSheetCallback(object :
                 BottomSheetBehavior.BottomSheetCallback() {
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
 
+            @Suppress("EmptyFunctionBlock")
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
             }
 
             override fun onStateChanged(bottomSheet: View, newState: Int) {

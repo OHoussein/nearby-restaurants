@@ -38,6 +38,7 @@ import dev.ohoussein.restos.ui.feature.venues.viewmodel.ShareRestaurantsViewMode
 import timber.log.Timber
 
 @AndroidEntryPoint
+@SuppressWarnings("TooManyFunctions")
 class RestaurantsMapFragment : MapBoxFragment() {
 
     companion object {
