@@ -1,4 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+import org.jetbrains.kotlin.konan.properties.hasProperty
+import java.util.Properties
 apply("checkDependencies.gradle")
 
 buildscript {
@@ -17,6 +19,12 @@ buildscript {
     }
 }
 
+fun readProperties(propertiesFile: File) = Properties().apply {
+    propertiesFile.inputStream().use { fis ->
+        load(fis)
+    }
+}
+
 allprojects {
     repositories {
         jcenter()
@@ -29,11 +37,11 @@ allprojects {
             credentials {
                 // This should always be `mapbox` (not your username).
                 username = "mapbox"
-                // Use the secret token you stored in gradle.properties as the password
-                password = if (project.hasProperty("MAPBOX_DOWNLOADS_TOKEN")) {
-                    project.property("MAPBOX_DOWNLOADS_TOKEN") as String
+                val secureProp= readProperties(project.rootDir.resolve("secure.properties"))
+                password = if (secureProp.hasProperty(ApiKeys.MAP_BOX_SECRET_PROP_KEY)) {
+                    secureProp.getProperty(ApiKeys.MAP_BOX_SECRET_PROP_KEY) as String
                 } else {
-                    System.getenv("MAPBOX_DOWNLOADS_TOKEN")
+                    System.getenv(ApiKeys.MAP_BOX_SECRET_PROP_KEY)
                 } ?: throw IllegalArgumentException("SDK  key is not specified")
             }
         }

@@ -29,7 +29,32 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             //TO-DO signing keys
             signingConfig debug.signingConfig
+
+            def secureProps = new Properties()
+            if (file("../secure.properties").exists()) {
+                file("../secure.properties")?.withInputStream { secureProps.load(it) }
+            }
+            resValue "string", ApiKeys.MAP_BOX_RES_KEY, (secureProps.getProperty(ApiKeys.MAP_BOX_PROP_KEY) ?: "")
+            resValue "string", ApiKeys.FSQ_ID_BOX_RES_KEY, (secureProps.getProperty(ApiKeys.FSQ_ID_PROP_KEY) ?: "")
+            resValue "string", ApiKeys.FSQ_SECRET_BOX_RES_KEY, (secureProps.getProperty(ApiKeys.FSQ_SECRET_PROP_KEY ) ?: "")
         }
+
+        debug {
+            def secureProps = new Properties()
+            if (file("../secure.properties").exists()) {
+                file("../secure.properties")?.withInputStream { secureProps.load(it) }
+            } else {
+                // copy properties from env
+                secureProps.put(ApiKeys.MAP_BOX_PROP_KEY, System.getenv(ApiKeys.MAP_BOX_PROP_KEY))
+                secureProps.put(ApiKeys.FSQ_ID_PROP_KEY, System.getenv(ApiKeys.FSQ_ID_PROP_KEY))
+                secureProps.put(ApiKeys.FSQ_SECRET_PROP_KEY, System.getenv(ApiKeys.FSQ_SECRET_PROP_KEY))
+            }
+
+            resValue "string", ApiKeys.MAP_BOX_RES_KEY, (secureProps.getProperty(ApiKeys.MAP_BOX_PROP_KEY) ?: "")
+            resValue "string", ApiKeys.FSQ_ID_BOX_RES_KEY, (secureProps.getProperty(ApiKeys.FSQ_ID_PROP_KEY) ?: "")
+            resValue "string", ApiKeys.FSQ_SECRET_BOX_RES_KEY, (secureProps.getProperty(ApiKeys.FSQ_SECRET_PROP_KEY ) ?: "")
+        }
+
     }
     sourceSets {
         def commonTestDir = 'src/commonTest/java'

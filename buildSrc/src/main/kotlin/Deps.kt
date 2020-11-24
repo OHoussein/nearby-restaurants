@@ -6,6 +6,16 @@ object AppVersion {
     const val versionName = "1.0"
 }
 
+object ApiKeys {
+    const val MAP_BOX_SECRET_PROP_KEY = "MAPBOX_DOWNLOADS_TOKEN"
+    const val MAP_BOX_PROP_KEY = "MAPBOX_CLIENT_ID"
+    const val MAP_BOX_RES_KEY = "mapbox_access_token"
+    const val FSQ_ID_PROP_KEY = "FOURSQUARE_CLIENT_ID"
+    const val FSQ_ID_BOX_RES_KEY = "fsq_client_id"
+    const val FSQ_SECRET_PROP_KEY = "FOURSQUARE_SECRET"
+    const val FSQ_SECRET_BOX_RES_KEY = "fsq_secret"
+}
+
 object BuildPlugins {
     object Versions {
         const val androidGradlePlugin = "4.0.2"
