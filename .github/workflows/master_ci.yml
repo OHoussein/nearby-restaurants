@@ -21,12 +21,18 @@ jobs:
 
       - name: Run Detekt
         run: ./gradlew detekt
+        env:
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
 
       - name: Run Lint
         run: ./gradlew lint
+        env:
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
 
       - name: Upload detekt reports
         uses: actions/upload-artifact@v1
+        env:
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
         with:
           name: quality_check
           path: ./app/build/reports/
@@ -46,12 +52,18 @@ jobs:
 
       - name: Run Presentation Unit Tests
         run: bash ./gradlew :app:testDebugUnitTest
+        env:
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
 
       - name: Run Data Unit Tests
         run: bash ./gradlew :data:testDebugUnitTest
+        env:
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
 
       - name: Run Domain Unit Tests
         run: bash ./gradlew :domain:test
+        env:
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
 
   instrumented-tests:
     name: Run Android Tests
@@ -73,6 +85,8 @@ jobs:
 
       - name: Run All Android Tests
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
         #continue-on-error: true
         with:
           api-level: ${{ matrix.api-level }}
@@ -82,6 +96,8 @@ jobs:
 
       - name: Upload emulator tests artifact
         uses: actions/upload-artifact@v1
+        env:
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
         with:
           name: emulator_tests
           path: ./app/build/reports/androidTests/connected
@@ -101,15 +117,21 @@ jobs:
 
       - name: Build Release APK
         run: bash ./gradlew assembleRelease --stacktrace
+        env:
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v1
+        env:
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
         with:
           name: apk
           path: ./app/build/outputs/apk/release/app-release.apk
 
       - name: Upload mapping file
         uses: actions/upload-artifact@v1
+        env:
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
         with:
           name: mapping
           path: ./app/build/outputs/mapping/release/mapping.txt
