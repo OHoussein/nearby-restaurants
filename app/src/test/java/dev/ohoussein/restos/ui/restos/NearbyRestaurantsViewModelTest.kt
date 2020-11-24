@@ -53,12 +53,13 @@ class NearbyRestaurantsViewModelTest {
     @Before
     fun setup() {
         useCase = mock()
+        //TODO this is workoround because TestCoroutineScope  doesn't block the debounce
+        NearbyRestaurantsViewModel.debounceTimer = 0
         tested = NearbyRestaurantsViewModel(
                 TestCoroutineContextProvider(testCoroutineRule.testCoroutineDispatcher),
                 useCase,
                 uiMapper,
         )
-        tested.debounceTimer = 0
     }
 
     @Test

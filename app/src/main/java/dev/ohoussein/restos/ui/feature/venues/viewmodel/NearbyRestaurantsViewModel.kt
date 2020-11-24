@@ -22,22 +22,21 @@ class NearbyRestaurantsViewModel @ViewModelInject constructor(
 
     companion object {
         const val LIMIT_VENUE_LIST = 50
-        const val DEBOUNCE_TIMER = 500L
+        var debounceTimer = 500L
     }
 
     private val viewPortLive = MutableLiveData<UiViewPort>()
 
     private val cachedVenueList = mutableListOf<UiVenue>()
 
-    //TODO this is workoround because TestCoroutineScope  doesn't block the debounce
-    var debounceTimer: Long = DEBOUNCE_TIMER
-
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val restaurantList: LiveData<UiResource<List<UiVenue>>> = viewPortLive
             .asFlow()
-            .apply {
+            .run {
+                //TODO this is workoround because TestCoroutineScope  doesn't block the debounce
                 if (debounceTimer > 0)
-                    debounce(debounceTimer)
+                    return@run debounce(debounceTimer)
+                return@run this
             }
             .flatMapLatest { currentViewPort ->
                 Timber.d("Call ws for $currentViewPort")
