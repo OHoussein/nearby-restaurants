@@ -1,20 +1,30 @@
-![Android Master CI](https://github.com/OHoussein/android-clean-archi/workflows/Android%20Master%20CI/badge.svg)
-![Android Develop CI](https://github.com/OHoussein/android-clean-archi/workflows/Android%20Develop%20CI/badge.svg)
+![Android Master CI](https://github.com/OHoussein/nearby-restaurants/workflows/Android%20Master%20CI/badge.svg)
 
-⚠️ This project works only with Android Studio 4
 
-Implementation of the clear architecture using: 
-* Koin for dependency injection
-* Paging 3
+<div  align="center">
+<img src="https://github.com/OHoussein/nearby-restaurants/blob/master/design/screenshot.png" alt="architecture" align=center />
+</div>
+
+An app that shows the restaurant around you using:
+* The clean architecture 
+* Dagger for dependency injection
 * Coroutine/Flow
-* Easy to test
+* Easy to test architecture
+* buildSrc
 * Github Action
+* Mapbox
+* Foursquare API
+
+# Build the project
+1. At your developer account at foursquare and copy your client ID and client secret in the secure.gradle file
+1. Copy your mapbox client id into secure.gradle
+1. Copy your mapbox secret id into secure.gradle
 
 
 # Architecture
 
 <div  align="center">
-<img src="https://github.com/OHoussein/android-clean-archi/blob/develop/design/architecture.svg" alt="architecture" align=center />
+<img src="https://github.com/OHoussein/nearby-restaurants/blob/master/design/architecture.png" alt="architecture" align=center />
 </div>
 
 ## Flow
@@ -44,11 +54,8 @@ With the DomainModelMappers, data models like api models or database model are c
 * **Flow :** for handling multi-shots data with coroutine with async collections transformation (a lot of its API still in experimental)
 * **Github Action :** For quick CI integration  and full integration with Github
 
-# The most difficult part
-The integration of the paging library with a clean architecture.
 
-
-# TODO 10%
-- [ ] Handling process death with ViewModel saved state
-- [ ] Flexible Navigation, maybe with the navigation component
-- [ ] Proguard with D8 for Shrinking, code optimization and code obfuscation
+# TODO
+- [ ] Handle process death with ViewModel saved state
+- [ ] Create the UI tests
+- [ ] Fix the uni tests caused by the flow dispatcher
