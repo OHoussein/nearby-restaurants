@@ -45,7 +45,9 @@ class RestaurantsActivity : AppCompatActivity() {
 
         bottomSheet.addBottomSheetCallback(object :
                 BottomSheetBehavior.BottomSheetCallback() {
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+
+            }
 
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState >= BottomSheetBehavior.STATE_COLLAPSED) {

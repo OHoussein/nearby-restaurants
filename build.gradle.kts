@@ -44,24 +44,6 @@ tasks.register("clean").configure {
     delete("build")
 }
 
-val detektAll by tasks.registering(io.gitlab.arturbosch.detekt.Detekt::class) {
-    buildUponDefaultConfig = true
-    autoCorrect = true
-    parallel = true
-    setSource(files(projectDir))
-    config.setFrom(files("$rootDir/config/detekt.yml"))
-    include("**/*.kt")
-    include("**/*.kts")
-    exclude("**/build/**")
-    exclude("**/buildSrc/**")
-    exclude("**/test/**/*.kt")
-    reports {
-        xml.enabled = true
-        html.enabled = false
-        txt.enabled = false
-    }
-}
-
 tasks {
     withType<io.gitlab.arturbosch.detekt.Detekt> {
 // Target version of the generated JVM bytecode. It is used for type resolution.

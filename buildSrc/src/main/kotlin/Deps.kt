@@ -11,6 +11,7 @@ object BuildPlugins {
         const val androidGradlePlugin = "4.0.2"
         const val kotlinVersion = "1.4.10"
         const val daggerHiltVersion = "2.28-alpha"
+        const val detektVersion = "1.14.2"
     }
 
     const val androidGradlePlugin = "com.android.tools.build:gradle:${Versions.androidGradlePlugin}"
@@ -19,7 +20,7 @@ object BuildPlugins {
     const val hiltGradlePlugin = "com.google.dagger:hilt-android-gradle-plugin:${Versions.daggerHiltVersion}"
     const val gradleVersionsTrackerPlugin = "com.github.ben-manes:gradle-versions-plugin:+"
     const val testLoggerPlugin = "com.adarshr:gradle-test-logger-plugin:2.1.1"
-    const val detektPlugin = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.14.2"
+    const val detektPlugin = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:${Versions.detektVersion}"
 
     const val androidApplication = "com.android.application"
     const val androidLibrary = "com.android.library"
@@ -38,6 +39,7 @@ object AndroidSdk {
     const val minSdk = 23
     const val compileSdk = 30
     const val targetSdk = compileSdk
+    const val ndkVersion = "21.3.6528147"
 }
 
 object Libs {

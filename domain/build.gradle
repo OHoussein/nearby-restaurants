@@ -2,6 +2,8 @@ apply plugin: BuildPlugins.kotlin
 apply plugin: BuildPlugins.testLogger
 apply plugin: BuildPlugins.detekt
 
+apply from: "$rootDir/gradle/scripts/detekt.gradle"
+
 dependencies {
     implementation Libs.kotlinStdlib
     implementation Libs.coroutinesCore

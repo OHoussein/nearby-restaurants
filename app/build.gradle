@@ -9,8 +9,11 @@ apply plugin: BuildPlugins.gradleVersionsTracker
 apply plugin: BuildPlugins.testLogger
 apply plugin: BuildPlugins.detekt
 
+apply from: "$rootDir/gradle/scripts/detekt.gradle"
+
 android {
     compileSdkVersion AndroidSdk.compileSdk
+    ndkVersion AndroidSdk.ndkVersion
     defaultConfig {
         applicationId AppVersion.applicationId
         minSdkVersion AndroidSdk.minSdk
