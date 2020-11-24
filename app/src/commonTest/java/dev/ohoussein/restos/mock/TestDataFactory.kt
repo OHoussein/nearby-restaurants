@@ -11,26 +11,37 @@ import kotlin.random.Random
 object TestDataFactory {
     private val idIndex = AtomicLong()
 
-    fun createRandomVenueList(count: Int) = (1..count).map {
-        createRandomVenue(it.toLong())
+    fun createRandomVenueList(
+            count: Int,
+            latCenter: Double = 40.0,
+            lngCenter: Double = 50.0,
+            delta: Double = 1.0,
+    ) = (1..count).map {
+        createRandomVenue(it.toLong(), latCenter, lngCenter, delta)
     }
 
-    fun createRandomVenue(id: Long = idIndex.getAndIncrement()) =
-            Venue(
-                    id = id.toString(),
-                    name = "Venue $id",
-                    location = createRandomLocation(id),
-                    categories = emptyList(),
-            )
+    fun createRandomVenue(
+            id: Long = idIndex.getAndIncrement(),
+            latCenter: Double = 40.0,
+            lngCenter: Double = 50.0,
+            delta: Double = 1.0,
+    ) = Venue(
+            id = id.toString(),
+            name = "Venue $id",
+            location = createRandomLocation(id, latCenter, lngCenter, delta),
+            categories = emptyList(),
+    )
 
-    fun createRandomLocation(id: Long = idIndex.getAndIncrement()) =
-            Location(
-                    coordinates = LocationCoordinates(
-                            lat = 48.87 + Random.nextDouble(-1.0, 1.0),
-                            lng = 50.0 + Random.nextDouble(-1.0, 1.0)
-                    ),
-                    address = "address $id",
-                    city = "city $id",
-                    distance = Random.nextInt(200),
-            )
+    fun createRandomLocation(id: Long = idIndex.getAndIncrement(),
+                             latCenter: Double,
+                             lngCenter: Double,
+                             delta: Double) = Location(
+            coordinates = LocationCoordinates(
+                    lat = latCenter + Random.nextDouble(-delta, delta),
+                    lng = lngCenter + Random.nextDouble(-delta, delta)
+            ),
+            address = "address $id",
+            city = "city $id",
+            distance = Random.nextInt(200),
+    )
 }

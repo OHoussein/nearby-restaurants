@@ -44,9 +44,9 @@ class NearbyRestaurantsViewModelTest {
     private val mockRepoListObserver = mock<Observer<UiResource<List<UiVenue>>>>()
 
     private val viewPort = UiViewPort(
-            northEast = UiCoordinates(48.87382636834763, 2.3251443457666863),
-            southWest = UiCoordinates(48.849191481820704, 2.3534122470179555),
-            center = UiCoordinates(48.86215448593467, 2.333098517114446),
+            northEast = UiCoordinates(40.1, 2.0),
+            southWest = UiCoordinates(40.0, 2.1),
+            center = UiCoordinates(40.05, 2.05),
             radius = 500,
     )
 
@@ -77,7 +77,7 @@ class NearbyRestaurantsViewModelTest {
     }
 
     @Test
-    fun `should get error when loading venue list`() {
+    fun `should get error when loading venue list`() = testCoroutineRule.testCoroutineDispatcher.runBlockingTest {
         //Given
         val error = IOException("")
         val dataFlow = flow<List<Venue>> { throw error }
@@ -89,4 +89,64 @@ class NearbyRestaurantsViewModelTest {
         verify(mockRepoListObserver).onChanged(any<UiResource.Loading<List<UiVenue>>>())
         verify(mockRepoListObserver).onChanged(any<UiResource.Error<List<UiVenue>>>())
     }
+
+    //TODO fix this unit test, another dispatcher issue on testing
+/*
+    @Test
+    fun `should get cache when loading`() = testCoroutineRule.testCoroutineDispatcher.runBlockingTest {
+        //Given
+
+        val smallerViewPort = UiViewPort(
+                northEast = UiCoordinates(40.1, 2.0),
+                southWest = UiCoordinates(40.0, 2.1),
+                center = UiCoordinates(40.05, 2.05),
+                radius = 500,
+        )
+        val smallerListVenue = TestDataFactory.createRandomVenueList(
+                count = 5,
+                smallerViewPort.center.lat,
+                smallerViewPort.center.lng,
+                delta = 1.0,
+        )
+        val largerViewPort = UiViewPort(
+                northEast = UiCoordinates(40.2, 2.0),
+                southWest = UiCoordinates(40.0, 2.2),
+                center = UiCoordinates(40.05, 2.05),
+                radius = 500,
+        )
+        val largerListVenue = TestDataFactory.createRandomVenueList(
+                count = 10,
+                largerViewPort.center.lat,
+                largerViewPort.center.lng,
+                delta = 1.0,
+        )
+
+        val firstListVenue = largerListVenue + smallerListVenue
+
+        tested.restaurantList.observeForever(mockRepoListObserver)
+
+        whenever(useCase.get(any())).thenReturn(flowOf(firstListVenue))
+        tested.updateViewPort(largerViewPort)
+
+        whenever(useCase.get(any())).thenReturn(flowOf(smallerListVenue))
+        tested.updateViewPort(smallerViewPort)
+
+        //Then
+        verify(mockRepoListObserver).onChanged(any<UiResource.Loading<List<UiVenue>>>())
+
+        argumentCaptor<UiResource<List<UiVenue>>>().apply {
+            verify(mockRepoListObserver, times(4)).onChanged(capture())
+            assertTrue(firstValue is UiResource.Loading)
+            assertTrue(secondValue is UiResource.Success)
+
+            val successData = secondValue as UiResource.Success
+            assertEquals(firstListVenue.size, successData.data.size)
+
+            assertTrue(thirdValue is UiResource.Loading)
+            val secondLoadingData = thirdValue as UiResource.Loading
+            assertNotNull(secondLoadingData.data)
+            assertEquals(smallerListVenue.size, secondLoadingData.data?.size)
+        }
+
+    }*/
 }
