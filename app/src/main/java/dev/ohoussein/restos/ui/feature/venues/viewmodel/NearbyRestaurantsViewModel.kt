@@ -9,12 +9,11 @@ import dev.ohoussein.restos.ui.core.mapper.UiDomainModelMapper
 import dev.ohoussein.restos.ui.core.model.UiResource
 import dev.ohoussein.restos.ui.core.model.UiVenue
 import dev.ohoussein.restos.ui.core.model.UiViewPort
-import dev.ohoussein.restos.ui.core.util.uiResourceFlow
+import dev.ohoussein.restos.ui.core.util.MapUtils.containedIn
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
+import timber.log.Timber
 
 class NearbyRestaurantsViewModel @ViewModelInject constructor(
         private val coroutineContextProvider: CoroutineContextProvider,
@@ -23,30 +22,72 @@ class NearbyRestaurantsViewModel @ViewModelInject constructor(
 
     companion object {
         const val LIMIT_VENUE_LIST = 50
-        const val DEBOUNCE_TIMER = 1000L
+        const val DEBOUNCE_TIMER = 500L
     }
 
-    private val viewPort = MutableLiveData<UiViewPort>()
+    private val viewPortLive = MutableLiveData<UiViewPort>()
 
-    @OptIn(FlowPreview::class)
-    val restaurantList: LiveData<UiResource<List<UiVenue>>> = viewPort
+    private val cachedVenueList = mutableListOf<UiVenue>()
+
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val restaurantList: LiveData<UiResource<List<UiVenue>>> = viewPortLive
             .asFlow()
             .debounce(DEBOUNCE_TIMER)
-            .flatMapLatest { uiViewPort ->
-                //TODO read from cache first
+            .flatMapLatest { currentViewPort ->
+                Timber.d("Call ws for $currentViewPort")
                 val params = GetVenuesParams(
-                        coordinates = modelsMapper.toDomain(uiViewPort.center),
-                        radius = uiViewPort.radius,
+                        coordinates = modelsMapper.toDomain(currentViewPort.center),
+                        radius = currentViewPort.radius,
                         limit = LIMIT_VENUE_LIST,
                 )
                 useCase.get(params)
                         .map { list -> list.map { modelsMapper.toUiModel(it) } }
-                        .uiResourceFlow()
+                        .map {
+                            addToCache(it)
+                            it
+                        }
+                        .map<List<UiVenue>, UiResource<List<UiVenue>>> {
+                            UiResource.Success(it)
+                        }
                         .flowOn(coroutineContextProvider.io)
+            }
+            .onStart {
+                viewPortLive.value?.let {
+                    val cached = getFromCache(it)
+                    emit(UiResource.Loading(cached))
+                }
+            }
+            .catch { error ->
+                viewPortLive.value?.let {
+                    val cached = getFromCache(it)
+                    emit(UiResource.Error(error, cached))
+                }
+                Timber.e(error)
+            }
+            .onEach {
+                if (it is UiResource.Success)
+                    addToCache(it.data)
             }
             .asLiveData()
 
+    private fun addToCache(list: List<UiVenue>) {
+        //remove duplicate
+        cachedVenueList.removeAll { cachedVenue ->
+            list.any { it.id == cachedVenue.id }
+        }
+        cachedVenueList.addAll(list)
+    }
+
+    private fun getFromCache(viewPort: UiViewPort): List<UiVenue> {
+        val filtred = cachedVenueList.filter {
+            it.location.coordinates.containedIn(viewPort)
+        }
+        Timber.d("Filtred ${filtred.size} existed ${cachedVenueList.size}")
+        return filtred
+    }
+
     fun updateViewPort(uiViewPort: UiViewPort) {
-        viewPort.value = uiViewPort
+        Timber.d("UpdateViewPort $uiViewPort")
+        viewPortLive.value = uiViewPort
     }
 }

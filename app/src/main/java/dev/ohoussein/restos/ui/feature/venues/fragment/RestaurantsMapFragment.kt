@@ -227,6 +227,14 @@ class RestaurantsMapFragment : MapBoxFragment() {
         }
     }
 
+    private fun showVenuesOnMap(data: List<UiVenue>) {
+        symbolManager?.delete(dicSymbolVenue.keys.toList())
+        dicSymbolVenue.clear()
+        data.forEach { uiVenue ->
+            addVenueToMap(uiVenue)
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // data
     ///////////////////////////////////////////////////////////////////////////
@@ -237,18 +245,18 @@ class RestaurantsMapFragment : MapBoxFragment() {
         })
 
         viewModel.restaurantList.observe(viewLifecycleOwner, { resource ->
+            Timber.d("Resource state  ${resource.javaClass.simpleName}")
             when (resource) {
                 is UiResource.Success -> {
-                    dicSymbolVenue.clear()
-                    Timber.d("Got data")
-                    resource.data.forEach { uiVenue ->
-                        addVenueToMap(uiVenue)
+                    showVenuesOnMap(resource.data)
+                }
+                is UiResource.Loading -> {
+                    if (resource.data != null) {
+                        showVenuesOnMap(resource.data)
                     }
                 }
             }
         })
-
-
     }
 
     private fun onSelectVenue(venue: UiVenue) {

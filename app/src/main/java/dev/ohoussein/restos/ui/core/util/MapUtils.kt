@@ -22,6 +22,7 @@ object MapUtils {
             lng = longitude
     )
 
+    //TODO check this
     fun LatLngBounds.radius() = max(
             abs(center.latitude - abs(northEast.altitude)),
             abs(center.longitude - abs(northEast.longitude)),
@@ -29,4 +30,12 @@ object MapUtils {
 
 
     fun UiCoordinates.toLatLng() = LatLng(lat, lng)
+
+    fun UiCoordinates.containedIn(viewPort: UiViewPort): Boolean {
+        val latLngBounds = LatLngBounds.Builder()
+                .include(LatLng(viewPort.northEast.toLatLng()))
+                .include(LatLng(viewPort.southWest.toLatLng()))
+                .build()
+        return latLngBounds.contains(toLatLng())
+    }
 }
