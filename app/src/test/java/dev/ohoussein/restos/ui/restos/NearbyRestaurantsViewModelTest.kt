@@ -7,6 +7,8 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import dev.ohoussein.restos.core.TestCoroutineContextProvider
+import dev.ohoussein.restos.core.delayedFlowOf
+import dev.ohoussein.restos.core.getOrAwaitValue
 import dev.ohoussein.restos.domain.model.Venue
 import dev.ohoussein.restos.domain.usecase.GetNearbyVenuesUseCase
 import dev.ohoussein.restos.mock.TestDataFactory
@@ -17,10 +19,14 @@ import dev.ohoussein.restos.ui.core.model.UiResource
 import dev.ohoussein.restos.ui.core.model.UiVenue
 import dev.ohoussein.restos.ui.core.model.UiViewPort
 import dev.ohoussein.restos.ui.feature.venues.viewmodel.NearbyRestaurantsViewModel
+import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
+import org.hamcrest.CoreMatchers.instanceOf
+import org.junit.After
+import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -50,16 +56,22 @@ class NearbyRestaurantsViewModelTest {
             radius = 500,
     )
 
+    private val apiTimeout = 500L
+
     @Before
     fun setup() {
         useCase = mock()
         //TODO this is workoround because TestCoroutineScope  doesn't block the debounce
-        NearbyRestaurantsViewModel.debounceTimer = 0
         tested = NearbyRestaurantsViewModel(
                 TestCoroutineContextProvider(testCoroutineRule.testCoroutineDispatcher),
                 useCase,
                 uiMapper,
         )
+    }
+
+    @After
+    fun cleanup() {
+        testCoroutineRule.testCoroutineDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -73,6 +85,7 @@ class NearbyRestaurantsViewModelTest {
         tested.restaurantList.observeForever(mockRepoListObserver)
         tested.updateViewPort(viewPort)
         //Then
+        advanceTimeBy(NearbyRestaurantsViewModel.DEBOUNCE_TIMER)
         verify(mockRepoListObserver).onChanged(any<UiResource.Loading<List<UiVenue>>>())
         verify(mockRepoListObserver).onChanged(UiResource.Success(uiData))
     }
@@ -87,16 +100,14 @@ class NearbyRestaurantsViewModelTest {
         tested.restaurantList.observeForever(mockRepoListObserver)
         tested.updateViewPort(viewPort)
         //Then
+        advanceTimeBy(NearbyRestaurantsViewModel.DEBOUNCE_TIMER)
         verify(mockRepoListObserver).onChanged(any<UiResource.Loading<List<UiVenue>>>())
         verify(mockRepoListObserver).onChanged(any<UiResource.Error<List<UiVenue>>>())
     }
 
-    //TODO fix this unit test, another dispatcher issue on testing
-/*
     @Test
     fun `should get cache when loading`() = testCoroutineRule.testCoroutineDispatcher.runBlockingTest {
         //Given
-
         val smallerViewPort = UiViewPort(
                 northEast = UiCoordinates(40.1, 2.0),
                 southWest = UiCoordinates(40.0, 2.1),
@@ -107,7 +118,7 @@ class NearbyRestaurantsViewModelTest {
                 count = 5,
                 smallerViewPort.center.lat,
                 smallerViewPort.center.lng,
-                delta = 1.0,
+                delta = 0.01,
         )
         val largerViewPort = UiViewPort(
                 northEast = UiCoordinates(40.2, 2.0),
@@ -119,35 +130,32 @@ class NearbyRestaurantsViewModelTest {
                 count = 10,
                 largerViewPort.center.lat,
                 largerViewPort.center.lng,
-                delta = 1.0,
+                delta = 0.01,
         )
 
-        val firstListVenue = largerListVenue + smallerListVenue
+        whenever(useCase.get(any()))
+                .thenReturn(delayedFlowOf(smallerListVenue, apiTimeout))
+                .thenReturn(delayedFlowOf(largerListVenue, apiTimeout))
 
-        tested.restaurantList.observeForever(mockRepoListObserver)
-
-        whenever(useCase.get(any())).thenReturn(flowOf(firstListVenue))
-        tested.updateViewPort(largerViewPort)
-
-        whenever(useCase.get(any())).thenReturn(flowOf(smallerListVenue))
+        //When
         tested.updateViewPort(smallerViewPort)
 
-        //Then
-        verify(mockRepoListObserver).onChanged(any<UiResource.Loading<List<UiVenue>>>())
-
-        argumentCaptor<UiResource<List<UiVenue>>>().apply {
-            verify(mockRepoListObserver, times(4)).onChanged(capture())
-            assertTrue(firstValue is UiResource.Loading)
-            assertTrue(secondValue is UiResource.Success)
-
-            val successData = secondValue as UiResource.Success
-            assertEquals(firstListVenue.size, successData.data.size)
-
-            assertTrue(thirdValue is UiResource.Loading)
-            val secondLoadingData = thirdValue as UiResource.Loading
-            assertNotNull(secondLoadingData.data)
-            assertEquals(smallerListVenue.size, secondLoadingData.data?.size)
+        val firstLoading = tested.restaurantList.getOrAwaitValue {
+            advanceTimeBy(NearbyRestaurantsViewModel.DEBOUNCE_TIMER)
         }
+        advanceTimeBy(apiTimeout)
+        val firstSuccess = tested.restaurantList.getOrAwaitValue()
+        tested.updateViewPort(largerViewPort)
+        advanceTimeBy(NearbyRestaurantsViewModel.DEBOUNCE_TIMER)
+        val secondLoading = tested.restaurantList.getOrAwaitValue()
+        advanceTimeBy(apiTimeout)
+        val secondSuccess = tested.restaurantList.getOrAwaitValue()
 
-    }*/
+        //Then
+        assertThat(firstLoading, instanceOf(UiResource.Loading::class.java))
+        assertThat(firstSuccess, instanceOf(UiResource.Success::class.java))
+        assertThat(secondLoading, instanceOf(UiResource.Loading::class.java))
+        assertEquals(smallerListVenue.size, (secondLoading as UiResource.Loading<List<UiVenue>>).data?.size)
+        assertThat(secondSuccess, instanceOf(UiResource.Success::class.java))
+    }
 }

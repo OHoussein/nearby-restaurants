@@ -1,7 +1,10 @@
 package dev.ohoussein.restos.ui.feature.venues.viewmodel
 
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.*
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
 import dev.ohoussein.restos.common.coroutine.CoroutineContextProvider
 import dev.ohoussein.restos.domain.model.GetVenuesParams
 import dev.ohoussein.restos.domain.usecase.GetNearbyVenuesUseCase
@@ -22,7 +25,7 @@ class NearbyRestaurantsViewModel @ViewModelInject constructor(
 
     companion object {
         const val LIMIT_VENUE_LIST = 50
-        var debounceTimer = 500L
+        const val DEBOUNCE_TIMER = 500L
     }
 
     private val viewPortLive = MutableLiveData<UiViewPort>()
@@ -30,37 +33,33 @@ class NearbyRestaurantsViewModel @ViewModelInject constructor(
     private val cachedVenueList = mutableListOf<UiVenue>()
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    val restaurantList: LiveData<UiResource<List<UiVenue>>> = viewPortLive
+    val restaurantList = viewPortLive
             .asFlow()
-            .run {
-                //TODO this is workoround because TestCoroutineScope  doesn't block the debounce
-                if (debounceTimer > 0)
-                    return@run debounce(debounceTimer)
-                return@run this
-            }
-            .flatMapLatest { currentViewPort ->
-                Timber.d("Call ws for $currentViewPort")
-                val params = GetVenuesParams(
-                        coordinates = modelsMapper.toDomain(currentViewPort.center),
-                        radius = currentViewPort.radius,
-                        limit = LIMIT_VENUE_LIST,
-                )
-                useCase.get(params)
-                        .map { list -> list.map { modelsMapper.toUiModel(it) } }
-                        .map {
-                            addToCache(it)
-                            it
-                        }
-                        .map<List<UiVenue>, UiResource<List<UiVenue>>> {
-                            UiResource.Success(it)
-                        }
-                        .flowOn(coroutineContextProvider.io)
-            }
-            .onStart {
-                val cached = viewPortLive.value?.let {
-                    getFromCache(it)
-                } ?: emptyList()
-                emit(UiResource.Loading(cached))
+            .debounce(DEBOUNCE_TIMER)
+            .flatMapLatest { viewPort ->
+                flow {
+                    val cached = getFromCache(viewPort)
+                    emit(UiResource.Loading(cached))
+
+                    Timber.d("Call ws for $viewPort")
+                    val params = GetVenuesParams(
+                            coordinates = modelsMapper.toDomain(viewPort.center),
+                            radius = viewPort.radius,
+                            limit = LIMIT_VENUE_LIST,
+                    )
+                    emitAll(
+                            useCase.get(params)
+                                    .map { list -> list.map { modelsMapper.toUiModel(it) } }
+                                    .map {
+                                        addToCache(it)
+                                        it
+                                    }
+                                    .map<List<UiVenue>, UiResource<List<UiVenue>>> {
+                                        UiResource.Success(it)
+                                    }
+                                    .flowOn(coroutineContextProvider.io)
+                    )
+                }
             }
             .catch { error ->
                 viewPortLive.value?.let {
@@ -68,10 +67,6 @@ class NearbyRestaurantsViewModel @ViewModelInject constructor(
                     emit(UiResource.Error(error, cached))
                 }
                 Timber.e(error)
-            }
-            .onEach {
-                if (it is UiResource.Success)
-                    addToCache(it.data)
             }
             .flowOn(coroutineContextProvider.io)
             .asLiveData()
